@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name     Builder Helper
+// @namespace   https://*.tribalwars.br
 // @namespace   https://*.tribalwars.net
-// @namespace   https://*.voynaplemyon.com
-// @include     *.tribalwars.net*screen=main*
+// @include     ***screen=main*
 // @version     1.1
 // @grant       GM_xmlhttpRequest
 // ==/UserScript==
