@@ -11,7 +11,7 @@
 $(document).ready(function() {
 
     let scriptInitials = 'FH';
-    let scriptFriendlyName = 'Assistente de Fazenda';
+    let scriptFriendlyName = 'Assistente de Farm';
     let scriptTimerColor = '#B5D278';
 
     let config = {};
