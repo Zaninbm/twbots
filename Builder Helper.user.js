@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name     Builder Helper
-// @namespace   https://*.tribalwars.br
 // @namespace   https://*.tribalwars.net
-// @include     ***screen=main*
+// @namespace   https://*.tribalwars.br
+// @include     **screen=main*
 // @version     1.1
 // @grant       GM_xmlhttpRequest
 // ==/UserScript==
@@ -32,7 +32,7 @@ $(document).ready(function() {
     }
 
     function readSessionConfig() {
-        console.log('Reading session config ...');
+        console.log('Lendo configuração de sessão ...');
 
         config.session = {};
 
@@ -46,7 +46,7 @@ $(document).ready(function() {
                 break;
             }
 
-            // process only current script/village config
+            // processar apenas a configuração de script/vila atual
             if (key.startsWith(prefix)) {
                 let item = key.substr(prefix.length);
                 console.log(key + '->' + item);
@@ -58,24 +58,24 @@ $(document).ready(function() {
             disableSession();
         }
 
-        console.log('Session config read', config.session);
+        console.log('Configuração de sessão lida', config.session);
     }
 
     function saveSessionConfig() {
-        console.log('Saving session config ...', config.session);
+        console.log('Salvando configuração de sessão...', config.session);
         let prefix = scriptVillageName() + '.';
 
         for (let item in config.session) {
             let value = sessionStorage.getItem(prefix + item);
             if (!value || value != config.session[item]) {
-                console.log('Saving:', prefix + item, config.session[item]);
+                console.log('Salvando:', prefix + item, config.session[item]);
                 sessionStorage.setItem(prefix + item, config.session[item]);
             } else {
-                console.log('Not changed:', prefix + item, config.session[item]);
+                console.log('Não alterado:', prefix + item, config.session[item]);
             }
         }
 
-        console.log('Session config saved');
+        console.log('Configuração de sessão salva');
     }
 
     function isEnabled() {
@@ -101,9 +101,9 @@ $(document).ready(function() {
     }
 
     function createControls() {
-        console.log('Creating controls ...');
+        console.log('Criando controles...');
 
-        // Remove useless td
+        // Remover td inúteis
         document.getElementById('content_value').getElementsByTagName('table')[0].remove();
 
         let inputs = {};
@@ -129,7 +129,7 @@ $(document).ready(function() {
         let body = document.createElement('tbody');
         table.appendChild(body);
 
-        // add buttons
+        // adicionar botões
         let btntable = document.createElement('table');
         btntable.className = 'vis';
         btntable.width = '100%';
@@ -141,7 +141,7 @@ $(document).ready(function() {
         let tr0 = document.createElement('tr');
         body.appendChild(tr0);
 
-        // save
+        // salvar
         let tdb = document.createElement('td');
         tdb.width = '5%';
         tdb.align = 'center';
@@ -156,7 +156,7 @@ $(document).ready(function() {
 
         inputs.save = btn;
 
-        // start
+        // iniciar
         tdb = document.createElement('td');
         tdb.width = '5%';
         tdb.align = 'center';
@@ -175,8 +175,8 @@ $(document).ready(function() {
         tr0.appendChild(tdb);
         inputs.start = btn;
 
-        // create timers control
-        // create div
+        // criar controles de temporizadores
+        // criar div
         let timersDiv = document.createElement('div');
         timersDiv.className = 'vis';
         controlsDiv.after(timersDiv);
@@ -189,13 +189,13 @@ $(document).ready(function() {
         controlsDiv.appendChild(innerDiv);
 
         timersDiv.appendChild(createTimersTable());
-        console.log('Controls created.', inputs);
+        console.log('Controles criados.', inputs);
     }
 
     function saveSelection() {
         saveSessionConfig();
 
-        // add vilalge to timers list with no delay
+        // adicionar aldeia à lista de temporizadores sem atraso
         addTimer('Pronto para iniciar', pageUrl(), 0, true);
     }
 
@@ -211,7 +211,7 @@ $(document).ready(function() {
 
         disablecontrols();
 
-        setStatus('Iniciando ...');
+        setStatus('Iniciando...');
 
         startProcess(false);
     }
@@ -220,7 +220,7 @@ $(document).ready(function() {
         saveSelection();
         disablecontrols();
 
-        setStatus('Iniciando ...');
+        setStatus('Iniciando...');
         enableSession();
         loadFirstTimer();
     }
@@ -236,7 +236,7 @@ $(document).ready(function() {
         let max = wait ? (config.wait + 3) * 60000 : 800;
 
         let rand = Math.floor(Math.random() * (max - min + 1) + min);
-        console.log('Esperando por ' + rand + ' milissegundos ...');
+        console.log('Aguardando ' + rand + ' milissegundos...');
         window.setTimeout(function() {
             processBuild();
         }, rand);
@@ -259,185 +259,413 @@ $(document).ready(function() {
         }
         let url = pageUrl();
 
-        // add to timers list
-        // load first timer in list
+        // adicionar à lista de temporizadores
+        // carregar primeiro temporizador da lista
         addTimer(reason, url, time, true);
         loadFirstTimer();
     }
 
     function calculateDateTimeOffsets() {
-        let date = document.getElementById('serverDate').innerText.trim();
-        let serverOffset = document.getElementById('serverTime').innerText.trim().split(':');
-        let serverDateTime = new Date(Date.parse(date));
-        serverDateTime.setHours(serverOffset[0]);
-        serverDateTime.setMinutes(serverOffset[1]);
-        serverDateTime.setSeconds(serverOffset[2]);
+        let date = document.getElementById('serverDate').innerHTML.split('/');
+        let time = document.getElementById('serverTime').innerHTML.split(':');
 
-        let villageOffset = config.time.split(':');
-        let villageDateTime = new Date(serverDateTime);
-        villageDateTime.setHours(villageDateTime.getHours() + parseInt(villageOffset[0]));
-        villageDateTime.setMinutes(villageDateTime.getMinutes() + parseInt(villageOffset[1]));
-        villageDateTime.setSeconds(villageDateTime.getSeconds() + parseInt(villageOffset[2]));
+        const server = new Date();
+        server.setHours(parseInt(time[0]));
+        server.setMinutes(parseInt(time[1]));
+        server.setSeconds(parseInt(time[2]));
 
-        let currentDateTime = new Date(Date.parse(document.getElementById('timing').innerText.trim()));
-        let diff = villageDateTime - currentDateTime;
-
-        return diff;
+        const next = new Date();
+        const lines = document.getElementsByClassName('lit-item');
+        let left = -1;
+        if (lines.length > 3) {
+            let data = lines[3].firstChild.data;
+            data = data.substring(data.lastIndexOf(' ') + 1);
+            time = data.split(':');
+            next.setHours(parseInt(time[0]));
+            next.setMinutes(parseInt(time[1]));
+            next.setSeconds(parseInt(time[2]));
+            left = next.getTime() - server.getTime();
+            if (left > 3 * 60000) {
+                left = left - 3 * 60000 + 2000;
+            }
+        }
+        return left;
     }
 
     function processBuild() {
-        // Check if script is enabled
-        if (!isEnabled()) {
-            setStatus('Script desativado.');
-            return;
-        }
+        console.log('Processando...');
 
-        if (config.session.running) {
-            console.log('Build running...');
-            setStatus('Construção em andamento...');
-            return;
-        }
+        // encontrar comprimento da fila atual
+        var queue = document.querySelectorAll('[class*="buildorder_"]');
+        console.log('Comprimento da fila', queue.length);
 
-        setStatus('Verificando construções...');
+        let value = sessionStorage.getItem('OrdersQueue');
 
-        let buildingQueue = document.getElementById('buildqueue').getElementsByTagName('li');
-
-        if (buildingQueue.length > 0) {
-            console.log('Aguardando fila de construção...');
-            setStatus('Fila de construção ocupada. Aguardando...');
-            waitAndReload('Construções em andamento', 5, 10);
-            return;
-        }
-
-        let buildButton = document.getElementById('build');
-        if (buildButton) {
-            buildButton.click();
-            console.log('Construindo...');
-            setStatus('Construindo...');
+        if (value) {
+            orders = JSON.parse(value);
         } else {
-            console.log('Sem construções disponíveis.');
-            setStatus('Sem construções disponíveis.');
-            waitAndReload('Sem construções disponíveis', 5, 10);
+            orders = [];
+        }
+
+        let current = -1;
+
+        for (let i = 0; i < orders.length; ++i) {
+            const order = orders[i];
+            console.log('Tentando', order.name, order.level);
+            const node = readBuilding(order.name);
+            if (node) {
+                if (readLevel(node, order.name) < order.level) {
+                    current = i;
+                    break;
+                }
+            }
+        }
+
+        if (current > 0) {
+            orders.splice(0, current);
+            saveOrders();
+        }
+
+        if (orders.length == 0) {
+            // não há mais pedidos de construção, continuar com outros bots
+            loadFirstTimer();
+            return;
+        }
+
+        console.log('Pedido atual', orders[0]);
+
+        // Se a fila estiver muito longa
+        if (queue.length > 4) {
+            // esperar completar
+            waitAndReload('Fila muito longa', 14 * 60000, 19 * 60000);
+        } else {
+            let btn;
+
+            let node = readBuilding(orders[0].name);
+
+            const options = node.getElementsByClassName('build_options');
+
+            if (options && options.length > 0) {
+                // verificar se a fazenda é necessária
+                let inactive = options[0].getElementsByClassName('inactive center');
+                if (inactive && inactive.length > 0) {
+                    if (inactive[0].innerHTML.includes('Fazenda') && !isOrdered('fazenda')) {
+                        node = readBuilding('fazenda');
+                        orders.unshift({'name': 'fazenda', 'level': readLevel(node, 'fazenda') + 1});
+                        saveOrders();
+                        location.reload();
+                    }
+                }
+                inactive = options[0].getElementsByClassName('inactive');
+                if (inactive && inactive.length > 0) {
+                    if (inactive[0].innerHTML.includes('Armazém') && !isOrdered('armazém')) {
+                        node = readBuilding('armazém');
+                        orders.unshift({'name': 'armazém', 'level': readLevel(node, 'armazém') + 1});
+                        saveOrders();
+                        location.reload();
+                    }
+                }
+                const btns = options[0].getElementsByClassName('btn-build');
+                if (btns && btns.length > 0) {
+                    btn = btns[0];
+                }
+            }
+
+            if (btn && btn.checkVisibility()) {
+                btn.click();
+                window.setTimeout(function() {
+                    location.reload();
+                }, 4000);
+            } else {
+                waitAndReload('Aguardando ' + orders[0].name, 14 * 60000, 19 * 60000);
+            }
         }
     }
 
-    function setStatus(status) {
-        console.log(status);
-        document.getElementById('status').innerHTML = status;
-    }
-
-    function processFastCompletion() {
-        // Pronto para continuar
-        let readyButton = document.getElementById('ready');
-
-        if (readyButton) {
-            readyButton.click();
-            console.log('Continuando...');
-            setStatus('Continuando...');
+    function readBuildings() {
+        let names = [
+            'main',
+            'quartel',
+            'local',
+            'estátua',
+            'mercado',
+            'madeira',
+            'pedra',
+            'ferro',
+            'fazenda',
+            'armazém',
+            'esconderijo',
+            'estábulo',
+            'garagem',
+            'academia',
+            'ferreiro',
+            'muralha'
+        ];
+        for (const name of names) {
+            const building = readBuilding(name);
+            if (building) {
+              const level = readLevel(building, name);
+              buildings[name] = { 'node' : building, 'level': level, 'added': level };
+            }
         }
+        console.log(buildings);
     }
 
-    function createTimersTable() {
+    function createQueueControls() {
+        // Ler fila
+        let value = sessionStorage.getItem('OrdersQueue');
+
+        if (value) {
+            orders = JSON.parse(value);
+        } else {
+            orders = [];
+        }
+
+        // Criar interface do usuário
         let table = document.createElement('table');
         table.className = 'vis';
         table.width = '100%';
+        table.id = 'bot_orders_table';
+
+        const element = document.getElementById('contentContainer');
+
+        let controlsDiv = document.createElement('div');
+        controlsDiv.className = 'vis';
+        element.after(controlsDiv);
+
+        controlsDiv.appendChild(table);
+
+        // Criar Controles
+        let head = document.createElement('thead');
+        table.appendChild(head);
+
+        let tr = document.createElement('tr');
+        head.appendChild(tr);
+
+        let th = document.createElement('th');
+        th.width = '5%';
+        th.innerHTML = 'Del';
+        tr.appendChild(th);
+
+        th = document.createElement('th');
+        th.width = '15%';
+        th.innerHTML = 'Nome';
+        tr.appendChild(th);
+
+        th = document.createElement('th');
+        th.width = '20%';
+        th.innerHTML = 'Nível';
+        tr.appendChild(th);
+
+        th = document.createElement('th');
+        th.width = '60%';
+        th.innerHTML = 'Ações';
+        tr.appendChild(th);
 
         let body = document.createElement('tbody');
         table.appendChild(body);
 
-        let tr = document.createElement('tr');
-        body.appendChild(tr);
+        for (let i = 0; i < orders.length; ++i) {
+            const order = orders[i];
+            const node = readBuilding(order.name);
+            if (node) {
+                tr = document.createElement('tr');
+                body.appendChild(tr);
 
-        let th = document.createElement('th');
-        th.innerHTML = 'Status';
-        tr.appendChild(th);
+                let td = document.createElement('td');
+                td.align = 'center';
+                tr.appendChild(td);
 
-        th = document.createElement('th');
-        th.innerHTML = 'Tempo';
-        tr.appendChild(th);
+                let btn = document.createElement('input');
+                btn.className = 'btn-delete';
+                btn.type = 'button';
+                btn.value = 'X';
+                btn.addEventListener('click', function() {
+                    orders.splice(i, 1);
+                    saveOrders();
+                    location.reload();
+                }, false);
+                td.appendChild(btn);
 
-        th = document.createElement('th');
-        th.innerHTML = 'Ação';
-        tr.appendChild(th);
+                td = document.createElement('td');
+                td.innerHTML = order.name;
+                tr.appendChild(td);
 
-        let td = document.createElement('td');
-        td.colSpan = '3';
-        td.id = 'timers';
-        body.appendChild(td);
+                td = document.createElement('td');
+                td.innerHTML = order.level;
+                tr.appendChild(td);
+
+                td = document.createElement('td');
+                tr.appendChild(td);
+
+                const options = node.getElementsByClassName('build_options');
+
+                if (options && options.length > 0) {
+                    const btns = options[0].getElementsByClassName('btn-build');
+                    if (btns && btns.length > 0) {
+                        btn = btns[0];
+                        td.appendChild(btn);
+                    }
+                }
+            }
+        }
+    }
+
+    function readBuilding(name) {
+        return document.getElementById('buildqueue').querySelector('[data-building="' + name + '"]');
+    }
+
+    function readLevel(node, name) {
+        return parseInt(node.querySelector('[data-building="' + name + '"]').getElementsByClassName('lvl')[0].innerText);
+    }
+
+    function isOrdered(name) {
+        for (const order of orders) {
+            if (order.name === name) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    function saveOrders() {
+        sessionStorage.setItem('OrdersQueue', JSON.stringify(orders));
+    }
+
+    function loadFirstTimer() {
+        let timers = JSON.parse(sessionStorage.getItem('timers'));
+
+        if (timers && timers.length > 0) {
+            let timer = timers[0];
+
+            timers.splice(0, 1);
+            sessionStorage.setItem('timers', JSON.stringify(timers));
+
+            let url = timer.url;
+
+            let time = Math.floor(Math.random() * (timer.max - timer.min + 1) + timer.min);
+            let left = calculateDateTimeOffsets();
+
+            if (left > 0 && left < time) {
+                time = left;
+            }
+
+            addTimer(timer.reason, url, time, false);
+        } else {
+            // todo: atualizar dados?
+            //window.location.reload();
+        }
+    }
+
+    function addTimer(reason, url, time, now) {
+        console.log('Adicionando temporizador', reason, url, time, now);
+
+        let timers = JSON.parse(sessionStorage.getItem('timers'));
+
+        if (!timers) {
+            timers = [];
+        }
+
+        let timer = {'reason': reason, 'url': url, 'time': time};
+
+        if (now) {
+            timers.unshift(timer);
+        } else {
+            timers.push(timer);
+        }
+
+        sessionStorage.setItem('timers', JSON.stringify(timers));
+
+        console.log('Temporizador adicionado');
+    }
+
+    function setStatus(status) {
+        let statusDiv = document.getElementById('status');
+        if (!statusDiv) {
+            statusDiv = document.createElement('div');
+            statusDiv.id = 'status';
+            statusDiv.style.color = scriptTimerColor;
+            document.getElementById('content_value').appendChild(statusDiv);
+        }
+        statusDiv.innerHTML = status;
+    }
+
+    function createTimersTable() {
+        let timers = JSON.parse(sessionStorage.getItem('timers'));
+
+        let table = document.createElement('table');
+        table.className = 'vis';
+        table.width = '100%';
+
+        if (timers) {
+            let head = document.createElement('thead');
+            table.appendChild(head);
+
+            let tr = document.createElement('tr');
+            head.appendChild(tr);
+
+            let th = document.createElement('th');
+            th.width = '20%';
+            th.innerHTML = 'Tempo';
+            tr.appendChild(th);
+
+            th = document.createElement('th');
+            th.width = '50%';
+            th.innerHTML = 'Razão';
+            tr.appendChild(th);
+
+            th = document.createElement('th');
+            th.width = '30%';
+            th.innerHTML = 'Ações';
+            tr.appendChild(th);
+
+            let body = document.createElement('tbody');
+            table.appendChild(body);
+
+            for (let i = 0; i < timers.length; ++i) {
+                const timer = timers[i];
+                tr = document.createElement('tr');
+                body.appendChild(tr);
+
+                let td = document.createElement('td');
+                td.innerHTML = timer.time;
+                tr.appendChild(td);
+
+                td = document.createElement('td');
+                td.innerHTML = timer.reason;
+                tr.appendChild(td);
+
+                td = document.createElement('td');
+                tr.appendChild(td);
+
+                let btn = document.createElement('input');
+                btn.className = 'btn-delete';
+                btn.type = 'button';
+                btn.value = 'Cancelar';
+                btn.addEventListener('click', function() {
+                    timers.splice(i, 1);
+                    sessionStorage.setItem('timers', JSON.stringify(timers));
+                    location.reload();
+                }, false);
+                td.appendChild(btn);
+            }
+        }
 
         return table;
     }
 
-    function addTimer(status, url, time, start) {
-        let tr = document.createElement('tr');
-        let timers = document.getElementById('timers');
-        timers.appendChild(tr);
-
-        let td = document.createElement('td');
-        td.innerHTML = status;
-        tr.appendChild(td);
-
-        td = document.createElement('td');
-        td.innerHTML = formatTime(time);
-        tr.appendChild(td);
-
-        td = document.createElement('td');
-        let btn = document.createElement('input');
-        btn.className = 'btn';
-        btn.value = 'Remover';
-        btn.type = 'button';
-        btn.addEventListener('click', removeTimer.bind(null, tr), false);
-        td.appendChild(btn);
-        tr.appendChild(td);
-
-        if (start) {
-            td = document.createElement('td');
-            btn = document.createElement('input');
-            btn.className = 'btn';
-            btn.value = 'Iniciar';
-            btn.type = 'button';
-            btn.addEventListener('click', loadFirstTimer, false);
-            td.appendChild(btn);
-            tr.appendChild(td);
+    function processFastCompletion() {
+        let btns = document.querySelectorAll('[id*="btn_build_fast"]');
+        for (const btn of btns) {
+            btn.click();
         }
     }
 
-    function loadFirstTimer() {
-        let timers = document.getElementById('timers').getElementsByTagName('tr');
-        if (timers.length > 1) {
-            console.log('Loading next timer...');
-            let url = timers[1].cells[0].innerHTML;
-            let time = parseTime(timers[1].cells[1].innerHTML);
-            console.log('Loaded:', url, time);
-            timers[1].remove();
-            window.setTimeout(function() {
-                window.location.href = url;
-            }, time);
-        }
-    }
-
-    function removeTimer(tr) {
-        tr.remove();
-    }
-
-    function formatTime(time) {
-        let hours = Math.floor(time / 3600000);
-        let minutes = Math.floor((time % 3600000) / 60000);
-        let seconds = Math.floor((time % 60000) / 1000);
-        return hours.toString().padStart(2, '0') + ':' + minutes.toString().padStart(2, '0') + ':' + seconds.toString().padStart(2, '0');
-    }
-
-    function parseTime(time) {
-        let parts = time.split(':');
-        let hours = parseInt(parts[0]);
-        let minutes = parseInt(parts[1]);
-        let seconds = parseInt(parts[2]);
-        return hours * 3600000 + minutes * 60000 + seconds * 1000;
-    }
-
-    // Se o script estiver ativado, ele vai começar o processo de construção
-    if (isEnabled()) {
-        start();
+    function readScreenParams() {
+        let q = {};
+        const urlParams = new URLSearchParams(window.location.search);
+        q.village = urlParams.get('village');
+        q.t = urlParams.get('t');
+        config.q = q;
     }
 });
-
