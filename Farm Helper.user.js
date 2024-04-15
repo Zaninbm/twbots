@@ -1,9 +1,9 @@
 // ==UserScript==
 // @name     Farm Helper
+// @namespace   https://*.tribalwars.com.br
 // @namespace   https://*.tribalwars.net
-// @namespace   https://*.voynaplemyon.com
-// @include     *.voynaplemyon.com*screen=am_farm*
-// @include     *.tribalwars.net*screen=am_farm*
+// @include     **screen=am_farm*
+// @include     *.tribalwars*screen=am_farm*
 // @version     5.2
 // @grant       GM_xmlhttpRequest
 // ==/UserScript==
@@ -11,7 +11,7 @@
 $(document).ready(function() {
 
     let scriptInitials = 'FH';
-    let scriptFriendlyName = 'Фарм Бот';
+    let scriptFriendlyName = 'Assistente de Fazenda';
     let scriptTimerColor = '#B5D278';
 
     let config = {};
@@ -22,7 +22,7 @@ $(document).ready(function() {
     readReports();
     createControls();
 
-    // start loot if enabled
+    // iniciar coleta se estiver habilitado
     if (isEnabled()) {
         startLoot();
     }
@@ -32,7 +32,7 @@ $(document).ready(function() {
     }
 
     function readSessionConfig() {
-        console.log('Reading session config ...');
+        console.log('Lendo configuração da sessão...');
 
         config.session = {};
 
@@ -46,7 +46,7 @@ $(document).ready(function() {
                 break;
             }
 
-            // process only current script/village config
+            // processar apenas configuração do script/vilarejo atual
             if (key.startsWith(prefix)) {
                 let item = key.substr(prefix.length);
                 console.log(key + '->' + item);
@@ -58,24 +58,24 @@ $(document).ready(function() {
             disableSession();
         }
 
-        console.log('Session config read', config.session);
+        console.log('Configuração da sessão lida', config.session);
     }
 
     function saveSessionConfig() {
-        console.log('Saving session config ...', config.session);
+        console.log('Salvando configuração da sessão...', config.session);
         let prefix = scriptVillageName() + '.';
 
         for (let item in config.session) {
             let value = sessionStorage.getItem(prefix + item);
             if (!value || value != config.session[item]) {
-                console.log('Saving:', prefix + item, config.session[item]);
+                console.log('Salvando:', prefix + item, config.session[item]);
                 sessionStorage.setItem(prefix + item, config.session[item]);
             } else {
-                console.log('Not changed:', prefix + item, config.session[item]);
+                console.log('Sem alterações:', prefix + item, config.session[item]);
             }
         }
 
-        console.log('Session config saved');
+        console.log('Configuração da sessão salva');
     }
 
     function isEnabled() {
@@ -115,20 +115,20 @@ $(document).ready(function() {
     }
 
     function createControls() {
-        console.log('Creating controls ...');
+        console.log('Criando controles...');
 
         let inputs = {};
 
         let elements = document.querySelectorAll('div.vis');
         //console.log(elements);
 
-        // create div
+        // criar div
         let controlsDiv = document.createElement('div');
         controlsDiv.className = 'vis';
         elements[1].parentNode.insertBefore(controlsDiv, elements[1].nextSibling);
 
         let h = document.createElement('h4');
-        h.innerHTML = 'Фарм Бот';
+        h.innerHTML = 'Assistente de Fazenda';
         controlsDiv.appendChild(h);
 
         let innerDiv = document.createElement('div');
@@ -148,11 +148,11 @@ $(document).ready(function() {
         let tr1 = document.createElement('tr');
         body.appendChild(tr1);
 
-        // columns
+        // colunas
         let columns = [
-            ['', 'Статус'],
-            ['template', 'Шаблон', '<option value="a">A</option><option value="b">B</option>', 'a'],
-            ['distance', 'Расстояние', '<option value="6">6</option><option value="12">12</option><option value="18">18</option><option value="36">36</option><option value="100">100</option>', '36']
+            ['', 'Status'],
+            ['template', 'Modelo', '<option value="a">A</option><option value="b">B</option>', 'a'],
+            ['distance', 'Distância', '<option value="6">6</option><option value="12">12</option><option value="18">18</option><option value="36">36</option><option value="100">100</option>', '36']
         ];
 
         for (let i = 0; i < columns.length; ++i) {
@@ -164,7 +164,7 @@ $(document).ready(function() {
             let td = document.createElement('td');
             td.align = 'center';
             if (i == 0) {
-                td.innerHTML = 'Неактивно.';
+                td.innerHTML = 'Inativo.';
                 td.style = 'width:30%';
                 inputs[columns[i][0]] = td;
             } else {
@@ -175,33 +175,33 @@ $(document).ready(function() {
                 inputs[columns[i][0]] = input;
 
                 if (config.session[columns[i][0]]) {
-                    console.log('From session', columns[i][0], config.session[columns[i][0]]);
+                    console.log('Da sessão', columns[i][0], config.session[columns[i][0]]);
                     input.value = config.session[columns[i][0]];
                 } else {
-                    console.log('From defaults', columns[i][0]);
+                    console.log('Padrões', columns[i][0]);
                     input.value = columns[i][3];
                 }
             }
             tr1.appendChild(td);
         }
 
-        // add buttons
+        // adicionar botões
 
-        // save
+        // salvar
         let tdb = document.createElement('td');
         tdb.width = '5%';
         tdb.align = 'center';
 
         let btn = document.createElement('input');
         btn.className = 'btn';
-        btn.value = 'Сохранить';
+        btn.value = 'Salvar';
         btn.addEventListener('click', saveSelection, false);
         tdb.appendChild(btn);
 
         tr0.appendChild(tdb);
         inputs.save = btn;
 
-        // start
+        // iniciar
         tdb = document.createElement('td');
         tdb.width = '5%';
         tdb.align = 'center';
@@ -209,10 +209,10 @@ $(document).ready(function() {
         btn = document.createElement('input');
         btn.className = 'btn';
         if (!isEnabled()) {
-            btn.value = 'Запустить';
+            btn.value = 'Iniciar';
             btn.addEventListener('click', activate, false);
         } else {
-            btn.value = 'Остановить';
+            btn.value = 'Parar';
             btn.addEventListener('click', deactivate, false);
         }
         tdb.appendChild(btn);
@@ -220,18 +220,18 @@ $(document).ready(function() {
         tr1.appendChild(tdb);
         inputs.start = btn;
 
-        console.log('Controls created.', inputs);
+        console.log('Controles criados.', inputs);
 
         config.inputs = inputs;
 
-        // create timers control
-        // create div
+        // criar controle de temporizadores
+        // criar div
         let timersDiv = document.createElement('div');
         timersDiv.className = 'vis';
         controlsDiv.after(timersDiv);
 
         h = document.createElement('h4');
-        h.innerHTML = 'Очередь выполнения';
+        h.innerHTML = 'Fila de Execução';
         timersDiv.appendChild(h);
 
         innerDiv = document.createElement('div');
@@ -251,17 +251,17 @@ $(document).ready(function() {
         }
         saveSessionConfig();
 
-        // add vilalge to timers list with no delay
-        addTimer('Готовность к запуску', pageUrl(), 0, true);
+        // adicionar vilarejo à lista de temporizadores sem atraso
+        addTimer('Pronto para Iniciar', pageUrl(), 0, true);
     }
 
     function disablecontrols() {
-        // remove divs
+        // remover divs
         let elements = document.querySelectorAll('div.vis');
         elements[0].remove();
         elements[1].remove();
 
-        // disable controls
+        // desativar controles
         for (let control in config.inputs) {
             if (control != 'start') {
                 config.inputs[control].readOnly = true;
@@ -274,7 +274,7 @@ $(document).ready(function() {
 
         disablecontrols();
 
-        setStatus('Запусакется ...');
+        setStatus('Iniciando...');
 
         readIndex();
 
@@ -289,7 +289,7 @@ $(document).ready(function() {
         saveSelection();
         disablecontrols();
 
-        setStatus('Запусакется ...');
+        setStatus('Iniciando...');
         enableSession();
         loadFirstTimer();
     }
@@ -305,7 +305,7 @@ $(document).ready(function() {
         let max = wait ? (config.wait + 3) * 60000 : 800;
 
         let rand = Math.floor(Math.random() * (max - min + 1) + min);
-        console.log('Waiting for ' + rand + ' milliseconds ...');
+        console.log('Aguardando ' + rand + ' milissegundos...');
         window.setTimeout(function() {
             processReport();
         }, rand);
@@ -326,20 +326,20 @@ $(document).ready(function() {
 
         setStatus(reason);
 
-        // don't wait too long for page 3 - 5 sec
+        // não esperar muito tempo para a página 3 - 5 segundos
         let min = page ? 3000 : (config.wait - 3) * 60000;
         let max = page ? 5000 : (config.wait + 3) * 60000;
 
         let rand = Math.floor(Math.random() * (max - min + 1) + min);
 
-        console.log('Wait and reload', reason, page);
+        console.log('Aguardar e recarregar', reason, page);
         if (page == undefined) {
             page = getPage();
         }
         let url = pageUrl(page);
 
-        // add to timers list
-        // load first timer in list
+        // adicionar à lista de temporizadores
+        // carregar primeiro temporizador da lista
         addTimer(reason, url, rand, true);
         loadFirstTimer();
     }
@@ -353,7 +353,7 @@ $(document).ready(function() {
             page = parseInt(q.Farm_page);
         }
 
-        console.log('current page', page);
+        console.log('página atual', page);
 
         return page;
     }
@@ -369,20 +369,20 @@ $(document).ready(function() {
     }
 
     function processReport() {
-        console.log('Processing', config.currentIndex);
+        console.log('Processando', config.currentIndex);
 
         if (config.currentIndex >= config.reports.length) {
-            console.log('Done');
+            console.log('Concluído');
             let page = getNextPage();
             resetIndex();
-            waitAndReload('Страница завершена.', page);
+            waitAndReload('Página Concluída.', page);
         } else if (config.reports[config.currentIndex].distance > config.distance) {
             resetIndex();
-            waitAndReload('Радиус ' + config.distance + ' завершен.', 0);
+            waitAndReload('Raio ' + config.distance + ' Concluído.', 0);
         } else {
-            setStatus('Репорт: ' + config.currentIndex + '/' + config.reports.length + (config.reports[config.currentIndex].full ? ' * ':'') + ' ...');
+            setStatus('Relatório: ' + config.currentIndex + '/' + config.reports.length + (config.reports[config.currentIndex].full ? ' * ':'') + ' ...');
 
-            // sending POST
+            // enviando POST
             let data = 'target=' + config.reports[config.currentIndex].target + '&template_id=' + config.currentTemplate.template_id + '&source=' + config.q.village + '&h=' + config.q.h;
             let url = 'https://' + window.location.hostname + '/game.php?' + ((config.q.t) ? 't=' + config.q.t + '&' : '') + 'village=' + config.q.village + '&screen=am_farm&mode=farm&ajaxaction=farm&json=1&=';
             console.log(url, data);
@@ -408,7 +408,7 @@ $(document).ready(function() {
                             disableSession();
                             window.location.reload();
                         } else if (resp.response && resp.response.success) {
-                            // if full send one more
+                            // se estiver cheio, enviar mais um
                             if (config.reports[config.currentIndex].full) {
                                 config.reports[config.currentIndex].full = false;
                             } else {
@@ -420,7 +420,7 @@ $(document).ready(function() {
                             waitAndReload(resp.error[0]);
                         }
                     } else {
-                        setStatus('Failed to send request: ', response.status);
+                        setStatus('Falha ao enviar requisição: ', response.status);
                         console.log(response);
                     }
                 }
@@ -433,7 +433,7 @@ $(document).ready(function() {
     }
 
     function readReports() {
-        console.log('Reading reports ...');
+        console.log('Lendo relatórios...');
 
         let elements = document.querySelectorAll('[id^=village_]');
         let reports = [];
@@ -442,26 +442,26 @@ $(document).ready(function() {
 
             if (elements[i].className.startsWith('report_')) {
                 let report = {};
-                // get target
+                // obter alvo
                 report.target = elements[i].id.substring(8);
 
-                // get distance
+                // obter distância
                 report.distance = parseInt(elements[i].childNodes[15].innerHTML.split('.')[0]);
 
-                // haull
+                // capacidade máxima
                 report.full = elements[i].innerHTML.includes('Full haul');
                 reports.push(report);
             }
         }
 
         config.reports = reports;
-        console.log('Reports reading done.', reports);
+        console.log('Leitura de relatórios concluída.', reports);
     }
 
     function readScreenParams() {
-        console.log('Reading params ...');
+        console.log('Lendo parâmetros...');
 
-        // find sit id and h code
+        // encontrar id da aldeia e código h
         let elements = document.getElementsByClassName('footer-link');
         for (let i = elements.length - 1; i >= 0; i--) {
             config.q = readQuerryParams(String(elements[i]));
@@ -470,18 +470,18 @@ $(document).ready(function() {
             }
         }
 
-         // Read templates
+         // Ler modelos
         config.a = readTemplate(document.getElementsByClassName('farm_icon_a'));
         config.b = readTemplate(document.getElementsByClassName('farm_icon_b'));
 
-        console.log('Params reading done.', config);
+        console.log('Leitura de parâmetros concluída.', config);
     }
 
     function readQuerryParams(url) {
         let params = {};
         let hh = url.substring(url.indexOf('?') + 1).split('&');
 
-        // move params into config
+        // mover parâmetros para configuração
         for (let i = 0; i < hh.length; ++i) {
             let param = hh[i].split('=');
             params[param[0]] = param[1];
@@ -492,17 +492,17 @@ $(document).ready(function() {
 
     function readTemplate(elements) {
         if (elements.length < 2) {
-            console.log('Template not found ', elements);
+            console.log('Modelo não encontrado ', elements);
         } else {
             let element = elements[1];
-            console.log('Template found ', element.outerHTML.split(', ')[2].split(')')[0]);
+            console.log('Modelo encontrado ', element.outerHTML.split(', ')[2].split(')')[0]);
             return { 'template_id' : element.outerHTML.split(', ')[2].split(')')[0] };
         }
         return {};
     }
 
-    // timer
-    // Bot Name, Village, url, time - Date().getTime();
+    // temporizador
+    // Nome do Bot, Aldeia, url, tempo - Date().getTime();
 
     let timers;
     let timerTimeout = null;
@@ -517,86 +517,29 @@ $(document).ready(function() {
     addTimer('3', 'url', 12000);
 */
     function readTimers() {
-        console.log('Reading timers ...');
-        let value = sessionStorage.getItem('BotTimers');
-        if (value) {
-            timers = JSON.parse(value);
-        } else {
-            timers = [];
-        }
+        console.log('Lendo temporizadores...');
 
-        // timers are stored ordered
-        createTimersUi();
+        timers = {};
 
-        console.log('Timers read', JSON.stringify(timers));
-    }
-
-    function saveTimers() {
-        console.log('Saving timers ...');
-        sessionStorage.setItem('BotTimers', JSON.stringify(timers));
-        console.log('Timers saved');
-    }
-
-    function addTimer(reason, url, time, unique) {
-        console.log('Adding timer', reason, url, time, unique);
-
-        clearTimeout(timerTimeout);
-
-        let newTimer = {
-            name: scriptFriendlyName,
-            village: document.getElementsByClassName('village')[0].nextSibling.data,
-            color: scriptTimerColor,
-            reason: reason,
-            url: url,
-            time: new Date().getTime() + time
-        };
-
-        // drop prev timers from the same script+village if requested
-        if (unique) {
-            for (let i = 0; i < timers.length; ++i) {
-                if (timers[i].name == newTimer.name &&
-                    timers[i].village == newTimer.village) {
-                    timers.splice(i, 1);
-                    break;
-                }
-            }
-        }
-
-        // now add to list
         let i = 0;
-        for (; i < timers.length; ++i) {
-            if (timers[i].time > newTimer.time) {
+        while(true) {
+            let key = localStorage.key(i++);
+
+            if (!key) {
                 break;
             }
+
+            if (key.startsWith(scriptInitials)) {
+                let item = JSON.parse(localStorage.getItem(key));
+                console.log(key, '->', item);
+                timers[key] = item;
+            }
         }
 
-        timers.splice(i, 0, newTimer);
-        saveTimers();
+        console.log('Leitura de temporizadores concluída.', timers);
 
-        createTimersUi();
-    }
-
-    function loadFirstTimer() {
-        clearTimeout(timerTimeout);
-
-        if (timers.length > 0) {
-            let current = timers[0];
-            let time = current.time - new Date().getTime();
-            if (time <=0) {
-                time = 500;
-            }
-            console.log('Loading timer', current, time);
-            timerTimeout = setTimeout(function() {
-                console.log('---');
-                console.log('Timer', current.name, time);
-                // remove from list
-                timers.splice(0, 1);
-                saveTimers();
-                // reload page
-
-                console.log('Reloading to', current.url);
-                location.href = current.url;
-            }, time);
+        if (timerTimeout == null) {
+            loadFirstTimer();
         }
     }
 
@@ -604,84 +547,129 @@ $(document).ready(function() {
         let table = document.createElement('table');
         table.className = 'vis';
         table.width = '100%';
-        table.id = 'bot_timers_table';
-        return table;
-    }
-
-    function removeTimer(index) {
-        clearTimeout(timerTimeout);
-        timers.splice(index, 1);
-        saveTimers();
-        window.location.reload();
-    }
-
-    function createTimersUi() {
-        console.log('Creating timers UI ...');
-
-        // find table by id
-        let table = document.getElementById('bot_timers_table');
-
-        // delete children
-        while (table.firstChild) {
-            table.removeChild(table.lastChild);
-        }
 
         let body = document.createElement('tbody');
         table.appendChild(body);
 
-        let tr0 = document.createElement('tr');
-        body.appendChild(tr0);
-
-        let headers = ['Бот', 'Деревня', 'Причина', 'Время'];
-
-        for (let i = 0; i < headers.length; ++i) {
-            let th = document.createElement('th');
-            th.style = 'text-align:center';
-            th.innerHTML = headers[i];
-            tr0.appendChild(th);
-        }
-
-        let th = document.createElement('th');
-        th.innerHTML = '<img src="https://dsru.innogamescdn.com/asset/34f6b4c7/graphic/delete_small.png" title="" alt="" class="">';
-        tr0.appendChild(th);
-
-        // add nodes
-        for (let i = 0; i < timers.length; ++i) {
+        for (let timer in timers) {
             let tr = document.createElement('tr');
             body.appendChild(tr);
 
-            let timer = timers[i];
-            let td = document.createElement('td');
-            if (timer.color) { td.style = 'background-color: ' + timer.color; }
-            let href = document.createElement('a');
-            href.setAttribute('href', timer.url);
-            href.innerHTML = timer.name;
-            td.appendChild(href);
-            tr.appendChild(td);
+            let tdName = document.createElement('td');
+            tdName.style = 'text-align:left;';
+            tdName.innerHTML = timers[timer].name;
+            tr.appendChild(tdName);
 
-            td = document.createElement('td');
-            td.innerHTML = timer.village;
-            if (timer.color) { td.style = 'background-color: ' + timer.color; }
-            tr.appendChild(td);
+            let tdTime = document.createElement('td');
+            tdTime.style = 'text-align:center;';
+            tdTime.innerHTML = new Date(timers[timer].time).toLocaleTimeString();
+            tr.appendChild(tdTime);
 
-            td = document.createElement('td');
-            td.innerHTML = timer.reason;
-            if (timer.color) { td.style = 'background-color: ' + timer.color; }
-            tr.appendChild(td);
+            let tdActions = document.createElement('td');
+            tdActions.style = 'text-align:right;';
 
-            td = document.createElement('td');
-            let date = new Date();
-            date.setTime(timer.time);
-            td.innerHTML = date.toLocaleTimeString();
-            if (timer.color) { td.style = 'background-color: ' + timer.color; }
-            tr.appendChild(td);
+            let btnDelete = document.createElement('button');
+            btnDelete.className = 'btn';
+            btnDelete.innerHTML = 'X';
+            btnDelete.onclick = function() {
+                removeTimer(timer);
+            };
+            tdActions.appendChild(btnDelete);
 
-            td = document.createElement('td');
-            td.innerHTML = '<a class="" href="#"><img src="https://dsru.innogamescdn.com/asset/34f6b4c7/graphic/delete_small.png" title="" alt="" class=""></a>';
-            if (timer.color) { td.style = 'background-color: ' + timer.color; }
-            tr.appendChild(td);
-            td.addEventListener('click', function() {removeTimer(i)}, false);
+            tr.appendChild(tdActions);
+        }
+
+        return table;
+    }
+
+    function loadFirstTimer() {
+        console.log('Carregando primeiro temporizador...');
+
+        let minTime = Infinity;
+        let minTimer = null;
+
+        for (let timer in timers) {
+            if (timers[timer].time < minTime) {
+                minTime = timers[timer].time;
+                minTimer = timer;
+            }
+        }
+
+        if (minTimer != null) {
+            let timeLeft = minTime - Date.now();
+
+            if (timeLeft < 0) {
+                console.log('Temporizador expirado.');
+                removeTimer(minTimer);
+            } else {
+                console.log('Próximo temporizador em', timeLeft, 'ms');
+                timerTimeout = setTimeout(function() {
+                    timerTimeout = null;
+                    executeTimer(minTimer);
+                }, timeLeft);
+            }
         }
     }
 
+    function addTimer(name, url, time, save) {
+        console.log('Adicionando temporizador:', name, url, time);
+
+        let timer = {
+            name: name,
+            url: url,
+            time: Date.now() + time
+        };
+
+        timers[scriptInitials + '.' + name] = timer;
+        if (save) {
+            saveTimer(timer);
+        }
+
+        refreshTimersTable();
+    }
+
+    function removeTimer(timer) {
+        console.log('Removendo temporizador:', timer);
+
+        delete timers[timer];
+        localStorage.removeItem(timer);
+
+        refreshTimersTable();
+
+        if (timerTimeout != null) {
+            clearTimeout(timerTimeout);
+            timerTimeout = null;
+        }
+
+        loadFirstTimer();
+    }
+
+    function saveTimer(timer) {
+        console.log('Salvando temporizador:', timer);
+
+        localStorage.setItem(scriptInitials + '.' + timer.name, JSON.stringify(timer));
+    }
+
+    function executeTimer(timer) {
+        console.log('Executando temporizador:', timer);
+
+        let item = timers[timer];
+        if (item) {
+            delete timers[timer];
+            localStorage.removeItem(timer);
+            refreshTimersTable();
+
+            window.location.href = item.url;
+        }
+
+        loadFirstTimer();
+    }
+
+    function refreshTimersTable() {
+        let timersDiv = document.querySelector('div.vis:nth-of-type(2)');
+        timersDiv.innerHTML = '';
+        timersDiv.appendChild(createTimersTable());
+    }
+
+    console.log('Script carregado.');
 });
